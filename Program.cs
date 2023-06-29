@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Servirform.DataAcces;
 using Servirform;
 using Microsoft.OpenApi.Models;
+using Servirform.IOC;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,6 +53,9 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
+
+// Inyectando servicios Servicios 
+builder.Services.InyectarDependencias(builder.Configuration);
 
 // Habilitar el cors
 builder.Services.AddCors(options =>

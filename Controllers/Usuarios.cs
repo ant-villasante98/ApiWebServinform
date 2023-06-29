@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Servirform.Models.DataModels;
 using Servirform.DataAcces;
+using AutoMapper;
+using Servirform.Models.DTO;
 
 namespace Servirform.Controllers
 {
@@ -15,26 +17,29 @@ namespace Servirform.Controllers
     public class Usuarios : ControllerBase
     {
         private readonly ServinformContext _context;
+        private readonly IMapper _mapper;
 
-        public Usuarios(ServinformContext context)
+        public Usuarios(ServinformContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         // GET: api/Usuarios
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuarios()
+        public async Task<ActionResult<IEnumerable<UsuarioDTO>>> GetUsuarios()
         {
             if (_context.Usuarios == null)
             {
                 return NotFound();
             }
-            return await _context.Usuarios.ToListAsync();
+            List<Usuario> result = await _context.Usuarios.ToListAsync();
+            return _mapper.Map<List<UsuarioDTO>>(result);
         }
 
         // GET: api/Usuarios/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Usuario>> GetUsuario(string id)
+        public async Task<ActionResult<UsuarioDTO>> GetUsuario(string id)
         {
             if (_context.Usuarios == null)
             {
@@ -47,20 +52,20 @@ namespace Servirform.Controllers
                 return NotFound();
             }
 
-            return usuario;
+            return _mapper.Map<UsuarioDTO>(usuario);
         }
 
         // PUT: api/Usuarios/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUsuario(string id, Usuario usuario)
+        public async Task<IActionResult> PutUsuario(string id, UsuarioDTO usuario)
         {
             if (id != usuario.Email)
             {
                 return BadRequest();
             }
 
-            _context.Entry(usuario).State = EntityState.Modified;
+            _context.Entry(_mapper.Map<Usuario>(usuario)).State = EntityState.Modified;
 
             try
             {
@@ -84,13 +89,13 @@ namespace Servirform.Controllers
         // POST: api/Usuarios
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Usuario>> PostUsuario(Usuario usuario)
+        public async Task<ActionResult<UsuarioDTO>> PostUsuario(UsuarioDTO usuario)
         {
             if (_context.Usuarios == null)
             {
                 return Problem("Entity set 'ServinformContext.Usuarios'  is null.");
             }
-            _context.Usuarios.Add(usuario);
+            _context.Usuarios.Add(_mapper.Map<Usuario>(usuario));
             try
             {
                 await _context.SaveChangesAsync();
