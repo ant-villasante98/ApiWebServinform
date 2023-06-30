@@ -9,4 +9,5 @@ public class FacturaDTO
     public int IdEmpresa { get; set; }
 
     public float PrecioTotal { get; set; }
+    public virtual ICollection<LineasFacturaDTO> LineasFacturas { get; set; }
 }

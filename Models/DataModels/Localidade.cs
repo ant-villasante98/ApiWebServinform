@@ -13,7 +13,5 @@ public partial class Localidade
 
     public virtual ICollection<Barrio> Barrios { get; set; } = new List<Barrio>();
 
-    public virtual Localidade IdDepartamentoNavigation { get; set; } = null!;
-
-    public virtual ICollection<Localidade> InverseIdDepartamentoNavigation { get; set; } = new List<Localidade>();
+    public virtual Departamento IdDepartamentoNavigation { get; set; } = null!;
 }

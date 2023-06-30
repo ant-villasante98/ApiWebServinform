@@ -10,4 +10,8 @@ public partial class LineasFactura
     public int CodArticulo { get; set; }
 
     public float PrecioUnidad { get; set; }
+
+    public virtual Articulo CodArticuloNavigation { get; set; } = null!;
+
+    public virtual Factura NroFacturaNavigation { get; set; } = null!;
 }

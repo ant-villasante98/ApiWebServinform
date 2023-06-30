@@ -14,4 +14,6 @@ public partial class Factura
     public float PrecioTotal { get; set; }
 
     public virtual Empresa IdEmpresaNavigation { get; set; } = null!;
+
+    public virtual ICollection<LineasFactura> LineasFacturas { get; set; } = new List<LineasFactura>();
 }

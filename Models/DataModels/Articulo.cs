@@ -14,4 +14,6 @@ public partial class Articulo
     public int IdEmpresa { get; set; }
 
     public virtual Empresa IdEmpresaNavigation { get; set; } = null!;
+
+    public virtual ICollection<LineasFactura> LineasFacturas { get; set; } = new List<LineasFactura>();
 }

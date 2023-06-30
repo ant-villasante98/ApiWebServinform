@@ -159,6 +159,16 @@ public partial class ServinformContext : DbContext
             entity.Property(e => e.NroFactura).HasColumnName("nro_factura");
             entity.Property(e => e.CodArticulo).HasColumnName("cod_articulo");
             entity.Property(e => e.PrecioUnidad).HasColumnName("precio_unidad");
+
+            entity.HasOne(d => d.CodArticuloNavigation).WithMany(p => p.LineasFacturas)
+                .HasForeignKey(d => d.CodArticulo)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_lineas_facturas_articulos");
+
+            entity.HasOne(d => d.NroFacturaNavigation).WithMany(p => p.LineasFacturas)
+                .HasForeignKey(d => d.NroFactura)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_lineas_facturas_facturas");
         });
 
         modelBuilder.Entity<Localidade>(entity =>
@@ -173,7 +183,7 @@ public partial class ServinformContext : DbContext
                 .HasColumnType("character varying")
                 .HasColumnName("nombre");
 
-            entity.HasOne(d => d.IdDepartamentoNavigation).WithMany(p => p.InverseIdDepartamentoNavigation)
+            entity.HasOne(d => d.IdDepartamentoNavigation).WithMany(p => p.Localidades)
                 .HasForeignKey(d => d.IdDepartamento)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fk_localidades_departamentos");

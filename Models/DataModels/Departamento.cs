@@ -12,4 +12,6 @@ public partial class Departamento
     public int IdProvincia { get; set; }
 
     public virtual Provincia IdProvinciaNavigation { get; set; } = null!;
+
+    public virtual ICollection<Localidade> Localidades { get; set; } = new List<Localidade>();
 }
