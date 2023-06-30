@@ -20,12 +20,12 @@ public class AutoMapperProfile : Profile
         CreateMap<LineasFactura, LineasFacturaDTO>()
             .ForMember(destino =>
             destino.ArticuloNombre,
-            origin => origin.MapFrom(origin => origin.CodArticuloNavigation.Nombre));
+            opt => opt.MapFrom(origin => origin.CodArticuloNavigation.Nombre));
 
         CreateMap<LineasFacturaDTO, LineasFactura>()
             .ForMember(
                 destino => destino.CodArticuloNavigation,
-                origen => origen.Ignore()
+                opt => opt.Ignore()
             );
 
         #endregion LineasFactura
@@ -34,12 +34,12 @@ public class AutoMapperProfile : Profile
         CreateMap<Factura, FacturaDTO>()
             .ForMember(
                 destino => destino.FechaHora,
-                origen => origen.MapFrom(origen => origen.FechaHora.ToUniversalTime())
+                opt => opt.MapFrom(origen => origen.FechaHora.ToUniversalTime())
             );
         CreateMap<FacturaDTO, Factura>()
             .ForMember(
                 destino => destino.FechaHora,
-                origen => origen.MapFrom(origen => origen.FechaHora.ToLocalTime())
+                opt => opt.MapFrom(origen => origen.FechaHora.ToLocalTime())
             );
 
         #endregion Factura

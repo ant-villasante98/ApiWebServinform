@@ -6,7 +6,7 @@ public class LineasFacturaDTO
 
     public int CodArticulo { get; set; }
 
-    public string? ArticuloNombre { get; set; } = string.Empty;
+    public string? ArticuloNombre { get; set; }
 
     public float PrecioUnidad { get; set; }
 }
