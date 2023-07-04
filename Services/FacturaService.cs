@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Servirform.DataAcces;
 using Servirform.Models.DataModels;
 using Servirform.Services.Contrato;
@@ -11,6 +12,18 @@ public class FacturaService : IFacturaService
     public FacturaService(ServinformContext context)
     {
         _context = context;
+    }
+
+    public async Task<List<Factura>> FacturasPorEmpresas(int IdEmpresa)
+    {
+        if (_context.Facturas == null)
+        {
+            throw new TaskCanceledException();
+        }
+
+        var result = await _context.Facturas.Where(f => f.IdEmpresa == IdEmpresa).ToListAsync();
+
+        return result;
     }
 
     public async Task<Factura> RegitrarFactura(Factura factura)
@@ -47,4 +60,5 @@ public class FacturaService : IFacturaService
 
         return factura;
     }
+
 }

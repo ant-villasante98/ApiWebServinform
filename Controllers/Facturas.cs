@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -30,8 +32,10 @@ namespace Servirform.Controllers
 
         // GET: api/Facturas
         [HttpGet]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "administrador , usuario")]
         public async Task<ActionResult<IEnumerable<FacturaDTO>>> GetFacturas()
         {
+
             if (_context.Facturas == null)
             {
                 return NotFound();
@@ -42,6 +46,7 @@ namespace Servirform.Controllers
 
         // GET: api/Facturas/5
         [HttpGet("{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "administrador , usuario")]
         public async Task<ActionResult<FacturaDTO>> GetFactura(int id)
         {
             if (_context.Facturas == null)
@@ -49,11 +54,15 @@ namespace Servirform.Controllers
                 return NotFound();
             }
             var factura = await _context.Facturas.FindAsync(id);
+            // .Include(listf => listf.LineasFacturas)
+            // .ThenInclude(lf => lf.CodArticuloNavigation).FirstAsync();
+            // var factura = await _context.Facturas.FindAsync(id);
 
             if (factura == null)
             {
                 return NotFound();
             }
+            factura.LineasFacturas = await _context.LineasFacturas.Where(lf => lf.NroFactura == id).Include(lf => lf.CodArticuloNavigation).ToListAsync();
 
             return _mapper.Map<FacturaDTO>(factura);
         }
@@ -61,6 +70,7 @@ namespace Servirform.Controllers
         // PUT: api/Facturas/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "administrador,usuario")]
         public async Task<IActionResult> PutFactura(int id, FacturaDTO factura)
         {
             if (id != factura.NroFactura)
@@ -107,6 +117,8 @@ namespace Servirform.Controllers
 
         // DELETE: api/Facturas/5
         [HttpDelete("{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "administrador,usuario")]
+
         public async Task<IActionResult> DeleteFactura(int id)
         {
             if (_context.Facturas == null)
@@ -132,10 +144,23 @@ namespace Servirform.Controllers
 
 
         [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "administrador,usuario")]
         public async Task<ActionResult<FacturaDTO>> RegistrarFactura(FacturaDTO factura)
         {
             Factura facturaGenerada = await _facturaService.RegitrarFactura(_mapper.Map<Factura>(factura));
             return _mapper.Map<FacturaDTO>(facturaGenerada);
+        }
+
+        [HttpGet]
+        [Route("PorEmpresas/{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "administrador,usuario")]
+        public async Task<ActionResult<IEnumerable<FacturaDTO>>> FacturasPorEmpresas(int id)
+        {
+
+
+            List<Factura> facturas = await _facturaService.FacturasPorEmpresas(id);
+
+            return _mapper.Map<List<FacturaDTO>>(facturas);
         }
     }
 }

@@ -1,14 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Servirform.DataAcces;
 using Servirform.Models.DataModels;
 using Servirform.Models.DTO;
+using Servirform.Models.JWT;
+using Servirform.Services.Contrato;
 
 namespace Servirform.Controllers
 {
@@ -18,15 +23,18 @@ namespace Servirform.Controllers
     {
         private readonly ServinformContext _context;
         private readonly IMapper _mapper;
+        private readonly IUsuarioService _usuarioService;
 
-        public Empresas(ServinformContext context, IMapper mapper)
+        public Empresas(ServinformContext context, IMapper mapper, IUsuarioService usuarioService)
         {
             _context = context;
             _mapper = mapper;
+            _usuarioService = usuarioService;
         }
 
         // GET: api/Empresas
         [HttpGet]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "administrador")]
         public async Task<ActionResult<IEnumerable<EmpresaDTO>>> GetEmpresas()
         {
             if (_context.Empresas == null)
@@ -39,8 +47,11 @@ namespace Servirform.Controllers
 
         // GET: api/Empresas/5
         [HttpGet("{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "administrador,usuario")]
         public async Task<ActionResult<EmpresaDTO>> GetEmpresa(int id)
         {
+
+
             if (_context.Empresas == null)
             {
                 return NotFound();
@@ -52,17 +63,33 @@ namespace Servirform.Controllers
                 return NotFound();
             }
 
+            ClaimsPrincipal UserClaims = this.User;
+            var RoleUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Role)?.Value;
+            var EmailUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Email)?.Value;
+            bool Validacion = RoleUser == Roles.administrador.ToString() ? true : EmailUser == empresa.EmailUsuario;
+
+            if (!Validacion) return NotFound();
+
+
             return _mapper.Map<EmpresaDTO>(empresa);
         }
         // PUT: api/Empresas/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "administrador,usuario")]
         public async Task<IActionResult> PutEmpresa(int id, EmpresaDTO empresa)
         {
             if (id != empresa.Id)
             {
                 return BadRequest();
             }
+
+            ClaimsPrincipal UserClaims = this.User;
+            var RoleUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Role)?.Value;
+            var EmailUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Email)?.Value;
+            bool Validacion = RoleUser == Roles.administrador.ToString() ? true : await _context.Empresas.AnyAsync(e => e.Id == empresa.Id && e.EmailUsuario == EmailUser);
+
+            if (!Validacion) return NotFound();
 
             _context.Entry(_mapper.Map<Empresa>(empresa)).State = EntityState.Modified;
 
@@ -88,8 +115,16 @@ namespace Servirform.Controllers
         // POST: api/Empresas
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "administrador,usuario")]
         public async Task<ActionResult<EmpresaDTO>> PostEmpresa(EmpresaDTO empresa)
         {
+            ClaimsPrincipal UserClaims = this.User;
+            var RoleUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Role)?.Value;
+            var EmailUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Email)?.Value;
+            bool Validacion = RoleUser == Roles.administrador.ToString() ? true : EmailUser == empresa.EmailUsuario;
+
+            if (!Validacion) return NotFound();
+
             if (_context.Empresas == null)
             {
                 return Problem("Entity set 'ServinformContext.Empresas'  is null.");
@@ -104,6 +139,7 @@ namespace Servirform.Controllers
 
         // DELETE: api/Empresas/5
         [HttpDelete("{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "administrador,usuario")]
         public async Task<IActionResult> DeleteEmpresa(int id)
         {
             if (_context.Empresas == null)
@@ -115,6 +151,12 @@ namespace Servirform.Controllers
             {
                 return NotFound();
             }
+            ClaimsPrincipal UserClaims = this.User;
+            var RoleUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Role)?.Value;
+            var EmailUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Email)?.Value;
+            bool Validacion = RoleUser == Roles.administrador.ToString() ? true : EmailUser == empresa.EmailUsuario;
+
+            if (!Validacion) return NotFound();
 
             _context.Empresas.Remove(empresa);
             await _context.SaveChangesAsync();

@@ -9,6 +9,11 @@ using Servirform.Models.DataModels;
 using Servirform.DataAcces;
 using AutoMapper;
 using Servirform.Models.DTO;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using Servirform.Models.JWT;
+using Servirform.Services.Contrato;
 
 namespace Servirform.Controllers
 {
@@ -18,15 +23,18 @@ namespace Servirform.Controllers
     {
         private readonly ServinformContext _context;
         private readonly IMapper _mapper;
+        private readonly IUsuarioService _usuarioService;
 
-        public Usuarios(ServinformContext context, IMapper mapper)
+        public Usuarios(ServinformContext context, IMapper mapper, IUsuarioService usuarioService)
         {
             _context = context;
             _mapper = mapper;
+            _usuarioService = usuarioService;
         }
 
         // GET: api/Usuarios
         [HttpGet]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "administrador")]
         public async Task<ActionResult<IEnumerable<UsuarioDTO>>> GetUsuarios()
         {
             if (_context.Usuarios == null)
@@ -39,8 +47,18 @@ namespace Servirform.Controllers
 
         // GET: api/Usuarios/5
         [HttpGet("{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "administrador,usuario")]
         public async Task<ActionResult<UsuarioDTO>> GetUsuario(string id)
         {
+            ClaimsPrincipal UserClaims = this.User;
+            var RoleUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Role)?.Value;
+            var EmailUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Email)?.Value;
+            bool Validacion = RoleUser == Roles.administrador.ToString() ? true : EmailUser == id;
+            // Console.WriteLine($"Resultado de la Validacion :{Validacion} en {nameof(Usuarios)}");
+            // bool Validacion = await _usuarioService.ValidarUsuario(UserClaims, id);
+            // Si la validacion no cumple 
+            if (!Validacion) return Unauthorized();
+
             if (_context.Usuarios == null)
             {
                 return NotFound();
@@ -58,12 +76,20 @@ namespace Servirform.Controllers
         // PUT: api/Usuarios/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "administrador,usuario")]
         public async Task<IActionResult> PutUsuario(string id, UsuarioDTO usuario)
         {
             if (id != usuario.Email)
             {
                 return BadRequest();
             }
+
+            ClaimsPrincipal UserClaims = this.User;
+            var RoleUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Role)?.Value;
+            var EmailUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Email)?.Value;
+            bool Validacion = RoleUser == Roles.administrador.ToString() ? true : EmailUser == id;
+            // Si la validacion no cumple 
+            if (!Validacion) return Unauthorized();
 
             _context.Entry(_mapper.Map<Usuario>(usuario)).State = EntityState.Modified;
 
@@ -117,8 +143,16 @@ namespace Servirform.Controllers
 
         // DELETE: api/Usuarios/5
         [HttpDelete("{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "administrador,usuario")]
         public async Task<IActionResult> DeleteUsuario(string id)
         {
+            ClaimsPrincipal UserClaims = this.User;
+            var RoleUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Role)?.Value;
+            var EmailUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Email)?.Value;
+            bool Validacion = RoleUser == Roles.administrador.ToString() ? true : EmailUser == id;
+            // Si la validacion no cumple 
+            if (!Validacion) return Unauthorized();
+
             if (_context.Usuarios == null)
             {
                 return NotFound();
