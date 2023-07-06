@@ -14,8 +14,8 @@ public static class JwtHelpers
         List<Claim> claims = new List<Claim> {
             new Claim(ClaimTypes.Email, userAccounts.UserEmail),
             new Claim(ClaimTypes.NameIdentifier, id.ToString()),
-            new Claim(ClaimTypes.Expiration, DateTime.UtcNow.AddDays(1).ToString("MM ddd dd yyyy HH:mm:ss tt")),
-            new Claim(ClaimTypes.Role, userAccounts.Rol.ToString()),
+            new Claim(ClaimTypes.Expiration, DateTime.UtcNow.AddDays(1).ToString("dd/MM/yyyy HH:mm:ss tt")),
+            new Claim(ClaimTypes.Role, userAccounts.Rol),
         };
 
         return claims;

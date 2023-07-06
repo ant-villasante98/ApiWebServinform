@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -11,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Servirform.DataAcces;
 using Servirform.Models.DataModels;
 using Servirform.Models.DTO;
+using Servirform.Models.JWT;
 using Servirform.Services.Contrato;
 
 namespace Servirform.Controllers
@@ -32,7 +34,7 @@ namespace Servirform.Controllers
 
         // GET: api/Facturas
         [HttpGet]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "administrador , usuario")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "administrador")]
         public async Task<ActionResult<IEnumerable<FacturaDTO>>> GetFacturas()
         {
 
@@ -49,6 +51,7 @@ namespace Servirform.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "administrador , usuario")]
         public async Task<ActionResult<FacturaDTO>> GetFactura(int id)
         {
+
             if (_context.Facturas == null)
             {
                 return NotFound();
@@ -62,6 +65,13 @@ namespace Servirform.Controllers
             {
                 return NotFound();
             }
+            ClaimsPrincipal UserClaims = this.User;
+            var RoleUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Role)?.Value;
+            var EmailUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Email)?.Value;
+            bool Validacion = RoleUser == Roles.administrador.ToString() ? true : await _context.Empresas.AnyAsync(e => e.Id == factura.IdEmpresa && e.EmailUsuario == EmailUser);
+
+            if (!Validacion) return NotFound();
+
             factura.LineasFacturas = await _context.LineasFacturas.Where(lf => lf.NroFactura == id).Include(lf => lf.CodArticuloNavigation).ToListAsync();
 
             return _mapper.Map<FacturaDTO>(factura);
@@ -77,6 +87,13 @@ namespace Servirform.Controllers
             {
                 return BadRequest();
             }
+
+            ClaimsPrincipal UserClaims = this.User;
+            var RoleUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Role)?.Value;
+            var EmailUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Email)?.Value;
+            bool Validacion = RoleUser == Roles.administrador.ToString() ? true : await _context.Facturas.AnyAsync(f => f.NroFactura == id && f.IdEmpresaNavigation.EmailUsuario == EmailUser);
+
+            if (!Validacion) return NotFound();
 
             _context.Entry(_mapper.Map<Factura>(factura)).State = EntityState.Modified;
 
@@ -99,26 +116,9 @@ namespace Servirform.Controllers
             return NoContent();
         }
 
-        // POST: api/Facturas
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        // [HttpPost]
-        // public async Task<ActionResult<FacturaDTO>> PostFactura(FacturaDTO factura)
-        // {
-        //     if (_context.Facturas == null)
-        //     {
-        //         return Problem("Entity set 'ServinformContext.Facturas'  is null.");
-        //     }
-        //     Factura model = _mapper.Map<Factura>(factura);
-        //     _context.Facturas.Add(model);
-        //     await _context.SaveChangesAsync();
-
-        //     return CreatedAtAction("GetFactura", new { id = model.NroFactura }, _mapper.Map<FacturaDTO>(model));
-        // }
-
         // DELETE: api/Facturas/5
         [HttpDelete("{id}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "administrador,usuario")]
-
         public async Task<IActionResult> DeleteFactura(int id)
         {
             if (_context.Facturas == null)
@@ -130,6 +130,13 @@ namespace Servirform.Controllers
             {
                 return NotFound();
             }
+
+            ClaimsPrincipal UserClaims = this.User;
+            var RoleUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Role)?.Value;
+            var EmailUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Email)?.Value;
+            bool Validacion = RoleUser == Roles.administrador.ToString() ? true : await _context.Empresas.AnyAsync(e => factura.IdEmpresa == e.Id && e.EmailUsuario == EmailUser);
+
+            if (!Validacion) return NotFound();
 
             _context.Facturas.Remove(factura);
             await _context.SaveChangesAsync();
@@ -147,8 +154,24 @@ namespace Servirform.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "administrador,usuario")]
         public async Task<ActionResult<FacturaDTO>> RegistrarFactura(FacturaDTO factura)
         {
-            Factura facturaGenerada = await _facturaService.RegitrarFactura(_mapper.Map<Factura>(factura));
-            return _mapper.Map<FacturaDTO>(facturaGenerada);
+            ClaimsPrincipal UserClaims = this.User;
+            var RoleUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Role)?.Value;
+            var EmailUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Email)?.Value;
+            bool Validacion = RoleUser == Roles.administrador.ToString() ? true : await _context.Empresas.AnyAsync(e => factura.IdEmpresa == e.Id && e.EmailUsuario == EmailUser);
+
+            if (!Validacion) return NotFound();
+
+            try
+            {
+                Factura facturaGenerada = await _facturaService.RegitrarFactura(_mapper.Map<Factura>(factura));
+                return _mapper.Map<FacturaDTO>(facturaGenerada);
+
+
+            }
+            catch
+            {
+                return BadRequest();
+            }
         }
 
         [HttpGet]
@@ -156,11 +179,33 @@ namespace Servirform.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "administrador,usuario")]
         public async Task<ActionResult<IEnumerable<FacturaDTO>>> FacturasPorEmpresas(int id)
         {
+            ClaimsPrincipal UserClaims = this.User;
+            var RoleUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Role)?.Value;
+            var EmailUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Email)?.Value;
+            bool Validacion = RoleUser == Roles.administrador.ToString() ? true : await _context.Empresas.AnyAsync(e => e.Id == id && e.EmailUsuario == EmailUser);
 
+            if (!Validacion) return NotFound();
 
             List<Factura> facturas = await _facturaService.FacturasPorEmpresas(id);
 
             return _mapper.Map<List<FacturaDTO>>(facturas);
+        }
+
+        [HttpGet]
+        [Route("PorUsuario/{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "administrador,usuario")]
+        public async Task<ActionResult<IEnumerable<FacturaDTO>>> FacturasPorUsuario(string id)
+        {
+            ClaimsPrincipal UserClaims = this.User;
+            var RoleUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Role)?.Value;
+            var EmailUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Email)?.Value;
+            bool Validacion = RoleUser == Roles.administrador.ToString() ? true : EmailUser == id;
+
+            if (!Validacion) return NotFound();
+
+            List<Factura> ListFacturas = await _facturaService.FacturasPorUsuario(id);
+
+            return _mapper.Map<List<FacturaDTO>>(ListFacturas);
         }
     }
 }

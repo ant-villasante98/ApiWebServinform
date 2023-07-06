@@ -6,5 +6,7 @@ public interface IFacturaService
 {
     Task<Factura> RegitrarFactura(Factura factura);
 
-    Task<List<Factura>> FacturasPorEmpresas(int IdEmpresa);
+    Task<List<Factura>> FacturasPorEmpresas(int idEmpresa);
+
+    Task<List<Factura>> FacturasPorUsuario(string idUsuario);
 }

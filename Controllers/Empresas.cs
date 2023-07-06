@@ -23,13 +23,13 @@ namespace Servirform.Controllers
     {
         private readonly ServinformContext _context;
         private readonly IMapper _mapper;
-        private readonly IUsuarioService _usuarioService;
+        private readonly IEmpresaService _empresaService;
 
-        public Empresas(ServinformContext context, IMapper mapper, IUsuarioService usuarioService)
+        public Empresas(ServinformContext context, IMapper mapper, IEmpresaService empresaService)
         {
             _context = context;
             _mapper = mapper;
-            _usuarioService = usuarioService;
+            _empresaService = empresaService;
         }
 
         // GET: api/Empresas
@@ -167,6 +167,24 @@ namespace Servirform.Controllers
         private bool EmpresaExists(int id)
         {
             return (_context.Empresas?.Any(e => e.Id == id)).GetValueOrDefault();
+        }
+
+        [HttpGet]
+        [Route("PorUsuario/{id}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "administrador,usuario")]
+        public async Task<ActionResult<IEnumerable<EmpresaDTO>>> EmpresasPorUsuario(string id)
+        {
+            ClaimsPrincipal UserClaims = this.User;
+            var RoleUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Role)?.Value;
+            var EmailUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Email)?.Value;
+            bool Validacion = RoleUser == Roles.administrador.ToString() ? true : EmailUser == id;
+
+            if (!Validacion) return NotFound();
+
+            List<Empresa> ListEmpresas = await _empresaService.EmpresasPorUsuario(id);
+
+            return _mapper.Map<List<EmpresaDTO>>(ListEmpresas);
+
         }
     }
 }

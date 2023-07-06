@@ -69,7 +69,6 @@ namespace Servirform.Controllers
             {
                 return NotFound();
             }
-
             return _mapper.Map<UsuarioDTO>(usuario);
         }
 
@@ -137,7 +136,6 @@ namespace Servirform.Controllers
                     throw;
                 }
             }
-
             return CreatedAtAction("GetUsuario", new { id = usuario.Email }, usuario);
         }
 

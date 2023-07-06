@@ -14,16 +14,27 @@ public class FacturaService : IFacturaService
         _context = context;
     }
 
-    public async Task<List<Factura>> FacturasPorEmpresas(int IdEmpresa)
+    public async Task<List<Factura>> FacturasPorEmpresas(int idEmpresa)
     {
         if (_context.Facturas == null)
         {
             throw new TaskCanceledException();
         }
 
-        var result = await _context.Facturas.Where(f => f.IdEmpresa == IdEmpresa).ToListAsync();
+        var result = await _context.Facturas.Where(f => f.IdEmpresa == idEmpresa).ToListAsync();
 
         return result;
+    }
+
+    public async Task<List<Factura>> FacturasPorUsuario(string idUsuario)
+    {
+        if (_context.Facturas == null)
+        {
+            throw new TaskCanceledException();
+        }
+
+        List<Factura> ListFacturas = await _context.Facturas.Where(f => f.IdEmpresaNavigation.EmailUsuario == idUsuario).ToListAsync();
+        return ListFacturas;
     }
 
     public async Task<Factura> RegitrarFactura(Factura factura)

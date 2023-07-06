@@ -13,5 +13,5 @@ public class UserTokens
     public string? RefreshToken { get; set; }
     public Guid GuidId { get; set; }
     public DateTime ExpiredTime { get; set; }
-    public Roles Rol { get; set; }
+    public string Rol { get; set; } = string.Empty;
 }

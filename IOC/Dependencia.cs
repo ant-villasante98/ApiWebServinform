@@ -12,7 +12,7 @@ public static class Dependencia
         service.AddAutoMapper(typeof(Utility.AutoMapperProfile));
 
         service.AddScoped<IFacturaService, FacturaService>();
-
         service.AddScoped<IUsuarioService, UsuarioService>();
+        service.AddScoped<IEmpresaService, EmpresaService>();
     }
 }
