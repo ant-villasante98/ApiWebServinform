@@ -21,7 +21,7 @@ public class FacturaService : IFacturaService
             throw new TaskCanceledException();
         }
 
-        var result = await _context.Facturas.Where(f => f.IdEmpresa == idEmpresa).ToListAsync();
+        var result = await _context.Facturas.Where(f => f.IdEmpresa == idEmpresa).Include(f => f.IdEmpresaNavigation).ToListAsync();
 
         return result;
     }
@@ -33,7 +33,7 @@ public class FacturaService : IFacturaService
             throw new TaskCanceledException();
         }
 
-        List<Factura> ListFacturas = await _context.Facturas.Where(f => f.IdEmpresaNavigation.EmailUsuario == idUsuario).ToListAsync();
+        List<Factura> ListFacturas = await _context.Facturas.Where(f => f.IdEmpresaNavigation.EmailUsuario == idUsuario).Include(f => f.IdEmpresaNavigation).ToListAsync(); ;
         return ListFacturas;
     }
 

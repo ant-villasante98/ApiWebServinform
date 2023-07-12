@@ -13,5 +13,5 @@ public partial class Provincia
 
     public virtual ICollection<Departamento> Departamentos { get; set; } = new List<Departamento>();
 
-    public virtual Paise IdPaisNavigation { get; set; } = null!;
+    public virtual Pais IdPaisNavigation { get; set; } = null!;
 }

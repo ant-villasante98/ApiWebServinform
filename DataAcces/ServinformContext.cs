@@ -28,9 +28,9 @@ public partial class ServinformContext : DbContext
 
     public virtual DbSet<LineasFactura> LineasFacturas { get; set; }
 
-    public virtual DbSet<Localidade> Localidades { get; set; }
+    public virtual DbSet<Localidad> Localidades { get; set; }
 
-    public virtual DbSet<Paise> Paises { get; set; }
+    public virtual DbSet<Pais> Paises { get; set; }
 
     public virtual DbSet<Provincia> Provincias { get; set; }
 
@@ -171,7 +171,7 @@ public partial class ServinformContext : DbContext
                 .HasConstraintName("fk_lineas_facturas_facturas");
         });
 
-        modelBuilder.Entity<Localidade>(entity =>
+        modelBuilder.Entity<Localidad>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("localidades_pkey");
 
@@ -189,7 +189,7 @@ public partial class ServinformContext : DbContext
                 .HasConstraintName("fk_localidades_departamentos");
         });
 
-        modelBuilder.Entity<Paise>(entity =>
+        modelBuilder.Entity<Pais>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("paises_pkey");
 

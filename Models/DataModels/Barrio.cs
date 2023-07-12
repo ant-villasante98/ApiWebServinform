@@ -13,5 +13,5 @@ public partial class Barrio
 
     public virtual ICollection<Empresa> Empresas { get; set; } = new List<Empresa>();
 
-    public virtual Localidade IdLocalidadNavigation { get; set; } = null!;
+    public virtual Localidad IdLocalidadNavigation { get; set; } = null!;
 }

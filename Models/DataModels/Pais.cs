@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Servirform.Models.DataModels;
 
-public partial class Paise
+public partial class Pais
 {
     public int Id { get; set; }
 

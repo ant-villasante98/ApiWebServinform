@@ -42,7 +42,7 @@ namespace Servirform.Controllers
             {
                 return NotFound();
             }
-            List<Factura> result = await _context.Facturas.ToListAsync();
+            List<Factura> result = await _context.Facturas.Include(f => f.IdEmpresaNavigation).ToListAsync();
             return _mapper.Map<List<FacturaDTO>>(result);
         }
 
@@ -175,7 +175,7 @@ namespace Servirform.Controllers
         }
 
         [HttpGet]
-        [Route("PorEmpresas/{id}")]
+        [Route("PorEmpresa/{id}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "administrador,usuario")]
         public async Task<ActionResult<IEnumerable<FacturaDTO>>> FacturasPorEmpresas(int id)
         {

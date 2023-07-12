@@ -16,6 +16,7 @@ public static class JwtHelpers
             new Claim(ClaimTypes.NameIdentifier, id.ToString()),
             new Claim(ClaimTypes.Expiration, DateTime.UtcNow.AddDays(1).ToString("dd/MM/yyyy HH:mm:ss tt")),
             new Claim(ClaimTypes.Role, userAccounts.Rol),
+            new Claim(ClaimTypes.Name, userAccounts.UserName)
         };
 
         return claims;
@@ -63,6 +64,7 @@ public static class JwtHelpers
             userToken.UserEmail = model.UserEmail;
             userToken.GuidId = id;
             userToken.Rol = model.Rol;
+            userToken.UserName = model.UserName;
 
             return userToken;
 

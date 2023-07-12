@@ -2,7 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using Servirform.Models.JWT;
 
-namespace Servirform;
+namespace Servirform.IOC;
 public static class AddJwtTokenServicesExtensions
 {
     public static void AddJwtTokenServices(this IServiceCollection services, IConfiguration configuration)

@@ -35,13 +35,39 @@ public class AutoMapperProfile : Profile
             .ForMember(
                 destino => destino.FechaHora,
                 opt => opt.MapFrom(origen => origen.FechaHora.ToUniversalTime())
+            ).ForMember(
+                destino => destino.NombreEmpresa,
+                opt => opt.MapFrom(origin => origin.IdEmpresaNavigation.Nombre)
             );
         CreateMap<FacturaDTO, Factura>()
             .ForMember(
                 destino => destino.FechaHora,
                 opt => opt.MapFrom(origen => origen.FechaHora.ToLocalTime())
+            ).ForMember(
+                destino => destino.IdEmpresaNavigation,
+                opt => opt.Ignore()
             );
 
         #endregion Factura
+
+        #region Pais
+        CreateMap<Pais, PaisDTO>().ReverseMap();
+        #endregion Pais
+
+        #region Provincia
+        CreateMap<Provincia, ProvinciaDTO>().ReverseMap();
+        #endregion Provincia
+
+        #region Departamento
+        CreateMap<Departamento, DepartamentoDTO>().ReverseMap();
+        #endregion Departamento
+
+        #region Localidad
+        CreateMap<Localidad, LocalidadDTO>().ReverseMap();
+        #endregion Localidad
+
+        #region Barrio
+        CreateMap<Barrio, BarrioDTO>().ReverseMap();
+        #endregion Barrio
     }
 }

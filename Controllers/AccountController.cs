@@ -46,7 +46,6 @@ namespace Servirform.Controllers
             {
                 return BadRequest("Wrong password or not found user");
             }
-            Console.WriteLine($"{searchUser.Nombre}, {searchUser.Apellido}, {searchUser.Email}, {searchUser.IdRolNavigation.Nombre}");
 
             if (searchUser.IdRolNavigation.Nombre == null)
             {
@@ -57,6 +56,7 @@ namespace Servirform.Controllers
             Token = JwtHelpers.GetTokenKey(new UserTokens()
             {
                 UserEmail = searchUser.Email,
+                UserName = searchUser.Nombre,
                 Rol = RolUser
             }, _jwtSettings);
 
@@ -69,9 +69,10 @@ namespace Servirform.Controllers
         {
             ClaimsPrincipal UserClaims = this.User;
             var dateExpiredClaim = UserClaims.FindFirstValue(ClaimTypes.Expiration);
-            var emailUser = UserClaims.FindFirstValue(ClaimTypes.Email);
+            var UserEmail = UserClaims.FindFirstValue(ClaimTypes.Email);
             var rol = UserClaims.FindFirstValue(ClaimTypes.Role);
-            if (emailUser == null || rol == null || dateExpiredClaim == null)
+            var UserName = UserClaims.FindFirstValue(ClaimTypes.Name);
+            if (UserEmail == null || UserName == null || rol == null || dateExpiredClaim == null)
             {
                 return BadRequest(new
                 {
@@ -83,7 +84,8 @@ namespace Servirform.Controllers
 
             DateTime dateNow = DateTime.Now.ToUniversalTime();
 
-            Console.WriteLine($"fecha actual: {dateNow} , fecha token: {dateExpired}");
+            // Console.WriteLine($"fecha actual: {dateNow} , fecha token: {dateExpired}");
+            // Console.WriteLine($"Nombre de usuario: {UserName}");
 
             if (dateExpired < dateNow)
             {
@@ -97,7 +99,7 @@ namespace Servirform.Controllers
             var Token = new UserTokens();
 
 
-            bool result = await _context.Usuarios.AnyAsync(u => u.Email == emailUser && u.IdRolNavigation.Nombre == rol);
+            bool result = await _context.Usuarios.AnyAsync(u => u.Email == UserEmail && u.IdRolNavigation.Nombre == rol);
             if (!result)
             {
                 return BadRequest(new
@@ -109,7 +111,8 @@ namespace Servirform.Controllers
 
             Token = JwtHelpers.GetTokenKey(new UserTokens()
             {
-                UserEmail = emailUser,
+                UserEmail = UserEmail,
+                UserName = UserName,
                 Rol = rol
             }, _jwtSettings);
 
