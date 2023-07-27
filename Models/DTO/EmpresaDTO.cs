@@ -10,6 +10,7 @@ public class EmpresaDTO
     public int NroCalle { get; set; }
 
     public int IdBarrio { get; set; }
+    public string? NombreBarrio { get; set; }
 
     public string EmailUsuario { get; set; } = null!;
 }

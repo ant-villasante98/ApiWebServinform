@@ -172,7 +172,7 @@ namespace Servirform.Controllers
         [HttpGet]
         [Route("PorUsuario/{id}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "administrador,usuario")]
-        public async Task<ActionResult<IEnumerable<EmpresaDTO>>> EmpresasPorUsuario(string id)
+        public async Task<ActionResult<DataPaginatorDTO<EmpresaDTO>>> EmpresasPorUsuario(string id, [FromQuery(Name = "page")] int page = 1, [FromQuery(Name = "limit")] int limit = 10)
         {
             ClaimsPrincipal UserClaims = this.User;
             var RoleUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Role)?.Value;
@@ -180,10 +180,41 @@ namespace Servirform.Controllers
             bool Validacion = RoleUser == Roles.administrador.ToString() ? true : EmailUser == id;
 
             if (!Validacion) return NotFound();
+            int totalEmpresas = await _context.Empresas.Where(e => e.EmailUsuario == id).CountAsync();
 
-            List<Empresa> ListEmpresas = await _empresaService.EmpresasPorUsuario(id);
+            int lastPage = totalEmpresas / limit;
+            if (totalEmpresas % limit > 0)
+            {
+                lastPage++;
+            }
 
-            return _mapper.Map<List<EmpresaDTO>>(ListEmpresas);
+            Console.WriteLine($"Sobrante de pagina: {totalEmpresas % limit}");
+            Console.WriteLine($"Ultima pagina: {lastPage}");
+            Console.WriteLine($"Total de Empresas: {totalEmpresas}");
+
+            if (page > lastPage)
+            {
+                return NotFound();
+            }
+            Paginator paginator = new Paginator()
+            {
+                CurrentPage = page,
+                LastPage = lastPage,
+                Items = new PaginatorItems
+                {
+                    count = limit,
+                    total = totalEmpresas
+                }
+            };
+
+            List<Empresa> ListEmpresas = await _empresaService.EmpresasPorUsuario(id, limit, page);
+
+            List<EmpresaDTO> result = _mapper.Map<List<EmpresaDTO>>(ListEmpresas);
+            return new DataPaginatorDTO<EmpresaDTO>
+            {
+                Data = result,
+                Paginator = paginator
+            };
 
         }
     }

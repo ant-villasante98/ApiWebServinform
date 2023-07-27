@@ -13,7 +13,14 @@ public class AutoMapperProfile : Profile
         #endregion Usuario
 
         #region Empresa
-        CreateMap<Empresa, EmpresaDTO>().ReverseMap();
+        CreateMap<Empresa, EmpresaDTO>()
+            .ForMember(destino =>
+            destino.NombreBarrio,
+            opt => opt.MapFrom(origen => origen.IdBarrioNavigation.Nombre));
+        CreateMap<EmpresaDTO, Empresa>()
+        .ForMember(destino =>
+        destino.IdBarrioNavigation,
+        opt => opt.Ignore());
         #endregion Empresa
 
         #region LineasFactura

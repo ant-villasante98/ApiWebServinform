@@ -17,9 +17,9 @@ namespace Servirform.Controllers
     public class Departamentos : ControllerBase
     {
         private readonly ServinformContext _context;
-        private readonly Mapper _mapper;
+        private readonly IMapper _mapper;
 
-        public Departamentos(ServinformContext context, Mapper mapper)
+        public Departamentos(ServinformContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
@@ -126,6 +126,23 @@ namespace Servirform.Controllers
         private bool DepartamentoExists(int id)
         {
             return (_context.Departamentos?.Any(e => e.Id == id)).GetValueOrDefault();
+        }
+        [HttpGet]
+        [Route("PorProvincia/{id}")]
+        public async Task<ActionResult<List<DepartamentoDTO>>> DepartamentosPorProvincia(int id)
+        {
+            if (_context.Departamentos == null)
+            {
+                return NotFound();
+            }
+            var departamentos = await _context.Departamentos.Where(d => d.IdProvincia == id).ToListAsync();
+
+            if (departamentos == null)
+            {
+                return NotFound();
+            }
+
+            return _mapper.Map<List<Departamento>, List<DepartamentoDTO>>(departamentos);
         }
     }
 }

@@ -17,9 +17,9 @@ namespace Servirform.Controllers
     public class Provincias : ControllerBase
     {
         private readonly ServinformContext _context;
-        private readonly Mapper _mapper;
+        private readonly IMapper _mapper;
 
-        public Provincias(ServinformContext context, Mapper mapper)
+        public Provincias(ServinformContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
@@ -126,6 +126,24 @@ namespace Servirform.Controllers
         private bool ProvinciaExists(int id)
         {
             return (_context.Provincias?.Any(e => e.Id == id)).GetValueOrDefault();
+        }
+
+        [HttpGet]
+        [Route("PorPais/{id}")]
+        public async Task<ActionResult<List<ProvinciaDTO>>> ProvinciasPorPais(int id)
+        {
+            if (_context.Provincias == null)
+            {
+                return NotFound();
+            }
+            var provincias = await _context.Provincias.Where(pr => pr.IdPais == id).ToListAsync();
+
+            if (provincias == null)
+            {
+                return NotFound();
+            }
+
+            return _mapper.Map<List<Provincia>, List<ProvinciaDTO>>(provincias);
         }
     }
 }

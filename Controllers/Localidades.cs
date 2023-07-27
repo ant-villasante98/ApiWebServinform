@@ -17,9 +17,9 @@ namespace Servirform.Controllers
     public class Localidades : ControllerBase
     {
         private readonly ServinformContext _context;
-        private readonly Mapper _mapper;
+        private readonly IMapper _mapper;
 
-        public Localidades(ServinformContext context, Mapper mapper)
+        public Localidades(ServinformContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
@@ -126,6 +126,23 @@ namespace Servirform.Controllers
         private bool LocalidadExists(int id)
         {
             return (_context.Localidades?.Any(e => e.Id == id)).GetValueOrDefault();
+        }
+        [HttpGet]
+        [Route("PorDepartamento/{id}")]
+        public async Task<ActionResult<List<LocalidadDTO>>> LocalidadesPorDepartamento(int id)
+        {
+            if (_context.Localidades == null)
+            {
+                return NotFound();
+            }
+            var localidades = await _context.Localidades.Where(l => l.IdDepartamento == id).ToListAsync();
+
+            if (localidades == null)
+            {
+                return NotFound();
+            }
+
+            return _mapper.Map<List<Localidad>, List<LocalidadDTO>>(localidades);
         }
     }
 }

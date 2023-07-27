@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using Servirform.DataAcces;
 using Servirform.Models.DataModels;
 using Servirform.Services.Contrato;
@@ -26,14 +27,14 @@ public class FacturaService : IFacturaService
         return result;
     }
 
-    public async Task<List<Factura>> FacturasPorUsuario(string idUsuario)
+    public async Task<List<Factura>> FacturasPorUsuario(string idUsuario, int limit, int page)
     {
         if (_context.Facturas == null)
         {
             throw new TaskCanceledException();
         }
 
-        List<Factura> ListFacturas = await _context.Facturas.Where(f => f.IdEmpresaNavigation.EmailUsuario == idUsuario).Include(f => f.IdEmpresaNavigation).ToListAsync(); ;
+        List<Factura> ListFacturas = await _context.Facturas.Where(f => f.IdEmpresaNavigation.EmailUsuario == idUsuario).Skip((page - 1) * limit).Take(limit).Include(f => f.IdEmpresaNavigation).ToListAsync();
         return ListFacturas;
     }
 

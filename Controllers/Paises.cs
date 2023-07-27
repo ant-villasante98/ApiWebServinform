@@ -17,9 +17,9 @@ namespace Servirform.Controllers
     public class Paises : ControllerBase
     {
         private readonly ServinformContext _context;
-        private readonly Mapper _mapper;
+        private readonly IMapper _mapper;
 
-        public Paises(ServinformContext context, Mapper mapper)
+        public Paises(ServinformContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;

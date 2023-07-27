@@ -15,9 +15,9 @@ public class EmpresaService : IEmpresaService
         _context = context;
     }
 
-    public async Task<List<Empresa>> EmpresasPorUsuario(string idUsuario)
+    public async Task<List<Empresa>> EmpresasPorUsuario(string idUsuario, int limit, int page)
     {
-        List<Empresa> ListEmpresas = await _context.Empresas.Where(e => e.EmailUsuario == idUsuario).ToListAsync();
+        List<Empresa> ListEmpresas = await _context.Empresas.Where(e => e.EmailUsuario == idUsuario).Skip((page - 1) * limit).Take(limit).Include(e => e.IdBarrioNavigation).ToListAsync();
 
         return ListEmpresas;
     }

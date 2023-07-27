@@ -17,9 +17,9 @@ namespace Servirform.Controllers
     public class Barrios : ControllerBase
     {
         private readonly ServinformContext _context;
-        private readonly Mapper _mapper;
+        private readonly IMapper _mapper;
 
-        public Barrios(ServinformContext context, Mapper mapper)
+        public Barrios(ServinformContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
@@ -127,6 +127,23 @@ namespace Servirform.Controllers
         private bool BarrioExists(int id)
         {
             return (_context.Barrios?.Any(e => e.Id == id)).GetValueOrDefault();
+        }
+        [HttpGet]
+        [Route("PorLocalidad/{id}")]
+        public async Task<ActionResult<List<BarrioDTO>>> BarriosPorLocalidad(int id)
+        {
+            if (_context.Barrios == null)
+            {
+                return NotFound();
+            }
+            var barrios = await _context.Barrios.Where(b => b.IdLocalidad == id).ToListAsync();
+
+            if (barrios == null)
+            {
+                return NotFound();
+            }
+
+            return _mapper.Map<List<Barrio>, List<BarrioDTO>>(barrios);
         }
     }
 }

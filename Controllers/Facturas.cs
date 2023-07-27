@@ -194,8 +194,13 @@ namespace Servirform.Controllers
         [HttpGet]
         [Route("PorUsuario/{id}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "administrador,usuario")]
-        public async Task<ActionResult<IEnumerable<FacturaDTO>>> FacturasPorUsuario(string id)
+        public async Task<ActionResult<DataPaginatorDTO<FacturaDTO>>> FacturasPorUsuario(string id, [FromQuery(Name = "page")] int page = 1, [FromQuery(Name = "limit")] int limit = 10)
         {
+
+            Console.WriteLine($"Pagina: {page}");
+
+            Console.WriteLine($"Limite por pagina: {limit}");
+
             ClaimsPrincipal UserClaims = this.User;
             var RoleUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Role)?.Value;
             var EmailUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Email)?.Value;
@@ -203,9 +208,36 @@ namespace Servirform.Controllers
 
             if (!Validacion) return NotFound();
 
-            List<Factura> ListFacturas = await _facturaService.FacturasPorUsuario(id);
+            int totalFacturas = await _context.Facturas.Where(f => f.IdEmpresaNavigation.EmailUsuario == id).CountAsync();
 
-            return _mapper.Map<List<FacturaDTO>>(ListFacturas);
+            int lastPage = totalFacturas / limit;
+            if (totalFacturas % limit > 0)
+            {
+                lastPage++;
+            }
+
+            Console.WriteLine($"Sobrante de pagina: {totalFacturas % limit}");
+            Console.WriteLine($"Ultima pagina: {lastPage}");
+            Console.WriteLine($"Total de facturas: {totalFacturas}");
+
+            if (page > lastPage)
+            {
+                return NotFound();
+            }
+            Paginator paginator = new Paginator()
+            {
+                CurrentPage = page,
+                LastPage = lastPage
+            };
+            List<Factura> ListFacturas = await _facturaService.FacturasPorUsuario(id, limit, page);
+
+            List<FacturaDTO> result = _mapper.Map<List<FacturaDTO>>(ListFacturas);
+
+            return new DataPaginatorDTO<FacturaDTO>()
+            {
+                Data = result,
+                Paginator = paginator
+            };
         }
     }
 }
