@@ -172,7 +172,7 @@ namespace Servirform.Controllers
         [HttpGet]
         [Route("PorUsuario/{id}")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "administrador,usuario")]
-        public async Task<ActionResult<DataPaginatorDTO<EmpresaDTO>>> EmpresasPorUsuario(string id, [FromQuery(Name = "page")] int page = 1, [FromQuery(Name = "limit")] int limit = 10)
+        public async Task<ActionResult<DataPaginatorDTO<EmpresaDTO>>> EmpresasPorUsuario(string id, [FromQuery(Name = "page")] int page = 1, [FromQuery(Name = "limit")] int limit = 10, [FromQuery(Name = "orderBy")] string orderBy = "id", [FromQuery(Name = "sort")] string sort = "desc")
         {
             ClaimsPrincipal UserClaims = this.User;
             var RoleUser = UserClaims.FindFirst(x => x.Type == ClaimTypes.Role)?.Value;

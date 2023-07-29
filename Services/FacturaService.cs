@@ -27,14 +27,23 @@ public class FacturaService : IFacturaService
         return result;
     }
 
-    public async Task<List<Factura>> FacturasPorUsuario(string idUsuario, int limit, int page)
+    public async Task<List<Factura>> FacturasPorUsuario(string idUsuario, int limit, int page, string orderBy, string sort)
     {
         if (_context.Facturas == null)
         {
             throw new TaskCanceledException();
         }
 
-        List<Factura> ListFacturas = await _context.Facturas.Where(f => f.IdEmpresaNavigation.EmailUsuario == idUsuario).Skip((page - 1) * limit).Take(limit).Include(f => f.IdEmpresaNavigation).ToListAsync();
+        IQueryable<Factura> queryFactura = _context.Facturas.Where(f => f.IdEmpresaNavigation.EmailUsuario == idUsuario).Include(f => f.IdEmpresaNavigation);
+        if (sort == "desc")
+        {
+            queryFactura = queryFactura.OrderByDescending(f => f.NroFactura);
+        }
+        if (sort == "asc")
+        {
+            queryFactura = queryFactura.OrderBy(f => f.NroFactura);
+        }
+        List<Factura> ListFacturas = await queryFactura.Skip((page - 1) * limit).Take(limit).ToListAsync();
         return ListFacturas;
     }
 

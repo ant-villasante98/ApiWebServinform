@@ -8,5 +8,5 @@ public interface IFacturaService
 
     Task<List<Factura>> FacturasPorEmpresas(int idEmpresa);
 
-    Task<List<Factura>> FacturasPorUsuario(string idUsuario, int limit, int page);
+    Task<List<Factura>> FacturasPorUsuario(string idUsuario, int limit, int page, string orderBy, string sort);
 }
